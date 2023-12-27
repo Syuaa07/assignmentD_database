@@ -42,7 +42,7 @@ app.post('/register', (req,res) => {
 
     const hash = bcrypt.hashSync(password, 6);
 
-client.db("BENR2423").colllection("users").insertOne({"username":username, "password":hash});
+client.db("BENR2423").collection("users").insertOne({"username":username, "password":hash});
 
 res.send("register success")
 })
@@ -52,15 +52,15 @@ app.post('/login', (req,res) => {
     const{username, password} = req.body;
     console.log(username, password);
 
-    client.db("BENR2423").colllection("users").findOne({"username":username }).then((user)) => {
+    client.db("BENR2423").collection("users").findOne({"username":username }).then((user) => {
 
         console.log(user)
 
-        if(bcrypt.compareSync(password, user.password) == true);{
+        if(bcrypt.compareSync(password, user.password) == true){
 
             res.send("login success");
         }
-        else{
+        else {
             res.send("login failed")
         }
         })
