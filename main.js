@@ -63,12 +63,29 @@ app.post('/login', (req,res) => {
         else {
             res.send("login failed")
         }
+
         })
 
     })
+app.patch('/profile', (req, res) => {
+  console.log(req.body)
 
+  client.db("BENR2423").collection("users").updateOne({
+    "username":{$eq:req.body.username }
+  },
+  {
+    $set:{
+      "email": req.body.email,
+      "matrix": req.body.matrix,
+      "role":req.body.role,
+    
+  }
+
+}).then(result => {
+  res.send('Update Successfully')
+})
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })
-  
+})
