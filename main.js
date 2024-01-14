@@ -1,8 +1,9 @@
 
 const express = require('express')
-const app = express()
+const app = express();
 const port = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
+const jwt = require ('jsonwebtoken');
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
@@ -63,28 +64,45 @@ app.post('/login', (req,res) => {
         else {
             res.send("login failed")
         }
-
+        
         })
+        app.post('/login', (req,res) => {
 
-    })
-app.patch('/profile', (req, res) => {
-  console.log(req.body)
+          const{username, password} = req.body;
+      
+      
+          client.db("BENR2423").collection("users").find({"username":username }).then((result) => {
+      
+              const user = result[0]
+      
+              if(user){
+      
+              
+                  bcrypt.compare(password, user.password, function (err,result){
+                      if(result){
+      
+                          const token = jwt.sign[{
+      
+                              user:username,
+                              role:"student"
+                          }, "very strong password" , {expiresIn: "365d"}]
+      
+                          res.send(token)
+              }
+              else {
+                  res.send("wrong password")
+              }
+      
+              })
+          }else{
+      
+              res.send("user not found")
+      
+          }
+      })
+      })
 
-  client.db("BENR2423").collection("users").updateOne({
-    "username":{$eq:req.body.username }
-  },
-  {
-    $set:{
-      "email": req.body.email,
-      "matrix": req.body.matrix,
-      "role":req.body.role,
-    
-  }
-
-}).then(result => {
-  res.send('Update Successfully')
-})
-
+  
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })
