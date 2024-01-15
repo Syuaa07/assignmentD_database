@@ -34,6 +34,11 @@ run().catch(console.dir);
 
 app.use(express.json())
 
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
+
+
 
 app.post('/register', (req,res) => {
 
@@ -46,64 +51,28 @@ app.post('/register', (req,res) => {
 client.db("BENR2423").collection("users").insertOne({"username":username, "password":hash});
 
 res.send("register success")
-})
+
 
 app.post('/login', (req,res) => {
 
-    const{username, password} = req.body;
-    console.log(username, password);
+  const{username, password} = req.body;
+  console.log(username, password);
 
-    client.db("BENR2423").collection("users").findOne({"username":username }).then((user) => {
+  client.db("BENR2423").collection("users").findOne({"username":username }).then((user) => {
 
-        console.log(user)
+      console.log(user)
 
-        if(bcrypt.compareSync(password, user.password) == true){
+      if(bcrypt.compareSync(password, user.password) == true){
 
-            res.send("login success");
-        }
-        else {
-            res.send("login failed")
-        }
-        
-        })
-        app.post('/login', (req,res) => {
-
-          const{username, password} = req.body;
+          res.send("login success");
+      }
+      else {
+          res.send("login failed")
+      }
       
-      
-          client.db("BENR2423").collection("users").find({"username":username }).then((result) => {
-      
-              const user = result[0]
-      
-              if(user){
-      
-              
-                  bcrypt.compare(password, user.password, function (err,result){
-                      if(result){
-      
-                          const token = jwt.sign[{
-      
-                              user:username,
-                              role:"student"
-                          }, "very strong password" , {expiresIn: "365d"}]
-      
-                          res.send(token)
-              }
-              else {
-                  res.send("wrong password")
-              }
-      
-              })
-          }else{
-      
-              res.send("user not found")
-      
-          }
       })
-      })
+    })
 
-  
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+      
+
   })
-})
