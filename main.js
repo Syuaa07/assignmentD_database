@@ -3,7 +3,8 @@ const express = require('express')
 const app = express();
 const port = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
-const jwt = require ('jsonwebtoken');
+const jwt = require('jsonwebtoken');
+//const attendance = require ('./attendance.js')
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
@@ -32,90 +33,111 @@ async function run() {
 run().catch(console.dir);
 
 function generateAccessToken(payload) {
-	return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
+  return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
 }
+
+//app.get('/attendance', (req, res) => {
+// res.send(attendance)
+//});
 
 function verifyToken(req, res, next) {
-	const authHeader = req.headers['authorization']
-	const token = authHeader && authHeader.split(' ')[1]
+  let header = req.headers.authorization;
 
-	if (token == null) return res.sendStatus(401)
+  if (!header) {
+    return res.status(401).send('Unauthorized request');
+  }
 
-	jwt.verify(token, "very strong password", (err, user) => {
-		console.log(err)
+  let tokens = header.split(' ')[1]; // Ensure correct space-based split
 
-		if (err) return res.sendStatus(403)
+  try {
+    // Log token for inspection
+    console.log('Received token:', tokens);
 
-		req.user = user
+    jwt.verify(tokens, 'very strong password', async (err, decoded) => {
+      if (err) {
+        console.error('Error verifying token:', err);
+        return res.status(401).send('Invalid token');
+      }
 
-		next()
-	})
+      console.log('Decoded token:', decoded);
+
+      if (!decoded || !decoded.role) { // Check for missing properties
+        return res.status(401).send('Invalid or incomplete token');
+      }
+
+      if (decoded.role !== 'lecterur') {
+        return res.status(401).send('Invalid role');
+      }
+
+      next();
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).send('Internal server error');
+  }
 }
+
 
 app.use(express.json())
 
-app.post('/register', (req,res) => {
+app.post('/register', (req, res) => {
 
-    const{username, password} = req.body;
-    console.log(username, password);
-
-
-    const hash = bcrypt.hashSync(password, 6);
-    
-    client.db("BENR2423").collection("users").insertOne({"username":username, "password":hash});
-
-    res.send("register success")
-}) 
-
-app.post('/login', (req,res) => {
-  console.log('login', req.body);
-  const{username, password, role} = req.body;
-  const hash = bcrypt.hashSync(password, 10);
+  const { username, password , role} = req.body;
   console.log(username, password);
-      
-  client.db("BENR2423").collection("users").find({"username":username, "password": hash, "role": role }).toArray().then((result) => {
-      
-    const user = result[0]
-      
-    if(user){
-      
-              
-      bcrypt.compare(password, user.password, function (err,result){
-        if(result){
-      
-          const token = jwt.sign({
-      
-            user:username,
-            role:"student"
-          }, "very strong password" , {expiresIn: "365d"});
-      
-          res.send(token)
-        }
-        else {
-          res.send("wrong password")
-        }
-      
-      })
-    } else{
-      
-      res.send("user not found")
-      
-    }
-  })
+
+
+  const hash = bcrypt.hashSync(password, 10);
+
+  client.db("BENR2423").collection("users").insertOne({ 
+    "username": req.body.username, 
+    "password": hash,
+    "role": req.body.role });
+
+  res.send("register success")
 })
 
-app.post('/logout', (req,res) => {
+app.post('/login', async (req, res) => {
+  console.log('login', req.body);
+  const { username, password } = req.body;
 
-  const{username} = req.body;
+  console.log(username, password);
+
+  const user = await client.db("BENR2423").collection("users").find({ "username": username }).toArray();
+  console.log(user);
+
+  if (user) {
+    bcrypt.compare(password, user[0].password, (err, result) => {
+      if (result) {
+
+        const token = jwt.sign({
+
+          user: user[0].username,
+          role: user[0].role
+        }, "very strong password", { expiresIn: "365d" });
+
+        res.send(token)
+      }
+      else {
+        res.send("wrong password")
+      }
+
+    })
+  } else {
+
+    res.send("user not found")
+
+  }
+});
+
+app.post('/logout', verifyToken, (req, res) => {
+
+  const { username } = req.body;
   console.log(username);
 
-  
-client.db("BENR2423").collection("users").insertOne({"username":username});
-
-res.send("See You Next Time")
+  res.send("See You Next Time")
 })
 
 app.listen(port, () => {
-    
+
   console.log(`Example app listening on port ${port}`)
 })

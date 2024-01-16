@@ -1,37 +1,34 @@
-const MongoClient = require('mongodb').MongoClient;
-const Schema = MongoClient.Schema;
-const AttendanceSchema = new Schema({
-    role: {
-        type: String,
-    
-        required:'role is required'
+app.post('/attendance', subject.VerifyToken, async (req, res) => {
+     
+    client.db("BENR2423").collection("attendance").updateOne({ 
+      "username":{ $push: { attendance: attendance } }
     },
-    userType: {
-        type: String,
+    );
     
-        required:'usertype is required'
-    },
-    username: {
-        type: String,
+    if (result.modifiedCount === 0) 
+    return res.status(404).send('Students not found');
+    res.send('Attendance recorded');
+    const{attendance} = req.body;
+    console.log(attendance);
     
-        required:'username is required'
-    },
-    attendacedate: {
-        type: Date,
-        required:true,
-        default: Date
-    },
-    
-    subject: {
-        type: String,
-        required:true
-    },
-    
-    class:{
-        type: [
-          
-        ]
-      }
-});
-const Attendance = MongoClient.model("Attendance", AttendanceSchema);
-module.exports = {Attendance};
+   
+
+ });
+
+
+
+
+
+
+//async abcd => {
+  //  console.log('Hello World');
+//}
+
+//async banyak => {
+  //  console.log('Hello World');
+//}
+
+module.exports = {
+   attendance,
+   // abcd}
+}
