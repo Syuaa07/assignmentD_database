@@ -87,3 +87,17 @@
  
 
 //});
+//kalau kita nak create
+app.post('/attendance', async (req, res) => {
+  const { matrix, date, subject, section } = req.body;
+  client.db("BENR2423").collection("attendance").insertOne({
+    "matrix": req.body.matrix,
+    "date": req.body.date,
+    "subject": req.body.subject,
+    "section": req.body.section
+  })
+
+  res.send("Attendance Submitted")
+}
+);
+//get kalau guna nama or userame dia akan keluar semua , tapi kalau guna id dia akan keluar spesifik orangg
