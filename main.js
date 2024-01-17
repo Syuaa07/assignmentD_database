@@ -4,7 +4,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-//const attendance = require ('./attendance.js')
+const attendance = require('./attendance.js')
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
@@ -32,13 +32,20 @@ async function run() {
 }
 run().catch(console.dir);
 
-function generateAccessToken(payload) {
-  return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
-}
+app.use(express.json())
 
-//app.get('/attendance', (req, res) => {
-// res.send(attendance)
-//});
+app.post('/attendance', async (req, res) => {
+  const { matrix, date, subject, section } = req.body;
+  client.db("BENR2423").collection("attendance").insertOne({
+    "matrix": req.body.matrix,
+    "date": req.body.date,
+    "subject": req.body.subject,
+    "section": req.body.section
+  })
+
+  res.send("Attendance Submitted")
+}
+);
 
 function verifyToken(req, res, next) {
   let header = req.headers.authorization;
@@ -77,21 +84,23 @@ function verifyToken(req, res, next) {
   }
 }
 
-
-app.use(express.json())
+function generateAccessToken(payload) {
+  return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
+}
 
 app.post('/register', (req, res) => {
 
-  const { username, password , role} = req.body;
+  const { username, password, role } = req.body;
   console.log(username, password);
 
 
   const hash = bcrypt.hashSync(password, 10);
 
-  client.db("BENR2423").collection("users").insertOne({ 
-    "username": req.body.username, 
+  client.db("BENR2423").collection("users").insertOne({
+    "username": req.body.username,
     "password": hash,
-    "role": req.body.role });
+    "role": req.body.role
+  });
 
   res.send("register success")
 })
@@ -141,3 +150,4 @@ app.listen(port, () => {
 
   console.log(`Example app listening on port ${port}`)
 })
+
