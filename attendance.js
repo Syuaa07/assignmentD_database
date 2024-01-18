@@ -1,103 +1,75 @@
-/*app.get("/attendance/:id",async (req,res)=>{ //view
-              try{
-                const found = await findByID(req.params.id)
-                if(!found)
-                return res.status(404).json({msg:"No class found"})
-              res.json(found)
-              } catch(err){
-                res.status(500).json({msg: err.message})
-                }
-                })
-                // @route DELETE api/data/:id
-                // @desc Delete A Class By its Id
-                // @access public
-                app.delete("/attendance/:id",auth,(req,res)=> {
-                  const id = req.params.id;
-                  deleteData(id)
-                  .then(gone=>{
-                    res.json(gone)
-                    })
-                    .catch(e=>{
-                      res.status(500).json({ msg: "Error Deleting the
-                      Class"})
-                      })
-                      })
-                      // Helper Functions
-                      function auth(req,res,next){
-                        const token=req.header("x-auth-token");
-                        if (!token) {
-                          return res.status(401).json({ msg: "No Token
-                          Provided!"});
-                          } else {
-                            jwt.verify(token,process.env.JWT_SECRET ,
-                              (err,decoded)=>{
-                                if (err) {
+const express = require('express')
+const app = express();
+const port = process.env.PORT || 3000;
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const attendance = require('./attendance.js')
 
-*/
-  
-     
-     //app.get('/attendance/:id', async (req, res) => {
-      //const attendance = await Attendance.findById(req.params.id);
-     // res.json(attendance);
-    // });
-     
-     //app.patch('/attendance/:id', async (req, res) => {
-     // const updatedAttendance = await Attendance.findByIdAndUpdate(
-      //   req.params.id,
-       //  req.body,
-        // { new: true }
-     // );
-     // res.json(updatedAttendance);
-    // });
-     
-    //app.delete('/attendance/:id', async (req, res) => {
-    //  await Attendance.findByIdAndDelete(req.params.id);
-      //res.json({ message: 'Attendance record deleted' });
-   //  })
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
 
-// function addStudentData(_id,matric,date,subject,section) 
-//{
-//studentData[rollNumber] = {
-  //name: name,
-  //rollNumber: rollNumber,
-  //status: status
-//};
-//}
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
-//addStudentData("John Doe", 1, "Present");
-//addStudentData("Jane Smith", 2, "Absent");
+async function run() {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    //await client.close();
+  }
+}
+run().catch(console.dir);
 
-//function displayStudentData() {
-//let output = "<table><tr><th>Name</th><th>Roll Number</th><th>Status</th></tr>";
-//for (let rollNumber in studentData) {
-  //output += "<tr><td>" + studentData[rollNumber].name + "</td><td>" + studentData[rollNumber].rollNumber + "</td><td>" + studentData[rollNumber].status + "</td></tr>";
-//}
-//output += "</table>";
-//console.log(output);
-//}
+app.use(express.json())
 
-//displayStudentData();
-  
-  //if (result.modifiedCount === 0) 
-  //return res.status(404).send('Students not found');
-  //res.send('Attendance recorded');
-  //const{attendance} = req.body;
- // console.log(attendance);
-  
- 
 
-//});
-//kalau kita nak create
+//record attendance
 app.post('/attendance', async (req, res) => {
   const { matrix, date, subject, section } = req.body;
-  client.db("BENR2423").collection("attendance").insertOne({
-    "matrix": req.body.matrix,
-    "date": req.body.date,
-    "subject": req.body.subject,
-    "section": req.body.section
-  })
+  try {
+    attendanceModule.recordAttendance(matrix, date, subject, section);
+    res.status(201).send("Attendance Submitted");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(`Error ${error}`);
+  }
+});
+  async function recordAttendance(matrix, date, subject, section){
+    try{
+      const database = client.db ('BENR2423');
+      const collection = database.collection('attendance') ;
+      
+      const user ={
+        matrix: matrix,
+        date :date ,
+        subject:subject,
+        section:section,
+        };
+      
+        await collection.insertOne(user);
+        console.log("Attendance Submitted Successfully");
+      }
+      catch(error){
+        console.log("Attendance already exists")
+        }
+        }
+    
 
-  res.send("Attendance Submitted")
-}
-);
+
 //get kalau guna nama or userame dia akan keluar semua , tapi kalau guna id dia akan keluar spesifik orangg
+
+app.listen(port, () => {
+
+console.log(`Example app listening on port ${port}`)
+})
