@@ -1,4 +1,3 @@
-
 const express = require('express')
 const app = express();
 const port = process.env.PORT || 3000;
@@ -140,14 +139,15 @@ app.post('/login', async (req, res) => {
 
 app.post('/logout', verifyToken, (req, res) => {
 
-  const { username } = req.body;
+  console.log('logout', req.body);
+  const { username,} = req.body;
+
   console.log(username);
 
-  res.send("See You Next Time")
+  res.send("See You Again :)")
 })
 
 app.listen(port, () => {
 
   console.log(`Example app listening on port ${port}`)
 })
-

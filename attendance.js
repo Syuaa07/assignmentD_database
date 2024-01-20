@@ -1,75 +1,90 @@
 const express = require('express')
 const app = express();
 const port = process.env.PORT || 3000;
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const attendance = require('./attendance.js')
-
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    //await client.close();
-  }
-}
-run().catch(console.dir);
+const attendance = require ('./attendance.js')
 
 app.use(express.json())
 
+app.post('/attendance', verifyToken, async (req, res) => {
+    const { matrix, date, subject, section } = req.body;
+    try {
+      attendanceModule.recordAttendance(matrix, date, subject, section);
+      res.status(201).send("Attendance Submitted");
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(`Error ${error}`);
+    }
+  });
+    async function recordAttendance(matrix, date, subject, section){
+      try{
+        const database = client.db ('BENR2423');
+        const collection = database.collection('attendance') ;
+        
+        const user ={
+          matrix: matrix,
+          date :date ,
+          subject:subject,
+          section:section,
+          };
+        
+          await collection.insertOne(user);
+          console.log("Attendance Submitted Successfully");
+        }
+        catch(error){
+          console.log("Attendance already exists")
+          }
+          }
+      
 
-//record attendance
-app.post('/attendance', async (req, res) => {
-  const { matrix, date, subject, section } = req.body;
-  try {
-    attendanceModule.recordAttendance(matrix, date, subject, section);
-    res.status(201).send("Attendance Submitted");
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(`Error ${error}`);
+function verifyToken(req, res, next) {
+  let header = req.headers.authorization;
+
+  if (!header) {
+    return res.status(401).send('Unauthorized request');
   }
-});
-  async function recordAttendance(matrix, date, subject, section){
-    try{
-      const database = client.db ('BENR2423');
-      const collection = database.collection('attendance') ;
-      
-      const user ={
-        matrix: matrix,
-        date :date ,
-        subject:subject,
-        section:section,
-        };
-      
-        await collection.insertOne(user);
-        console.log("Attendance Submitted Successfully");
+
+  let tokens = header.split(' ')[1]; // Ensure correct space-based split
+
+  try {
+    // Log token for inspection
+    console.log('Received token:', tokens);
+
+    jwt.verify(tokens, 'very strong password', async (err, decoded) => {
+      if (err) {
+        console.error('Error verifying token:', err);
+        return res.status(401).send('Invalid token');
       }
-      catch(error){
-        console.log("Attendance already exists")
-        }
-        }
-    
+
+      console.log('Decoded token:', decoded);
+
+      if (!decoded || !decoded.role) { // Check for missing properties
+        return res.status(401).send('Invalid or incomplete token');
+      }
+
+      /*if (decoded.role !== 'lecterur') {
+        return res.status(401).send('Invalid role');
+        client.db('BENR2423').collection('attendance').find({})
+      
+      }*/
+      if (decoded.role !== 'students') {
+        return res.status(401).send('Invalid role');
+        client.db('BENR2423').collection('attendance').findOne({username:decoded.user})
+      }
+      /*if (decoded.role !== 'admin') {
+        return res.status(401).send('Invalid role');
+      }*/
 
 
-//get kalau guna nama or userame dia akan keluar semua , tapi kalau guna id dia akan keluar spesifik orangg
+      next();
+    });
 
-app.listen(port, () => {
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).send('Internal server error');
+  }
+}
 
-console.log(`Example app listening on port ${port}`)
-})
+module.exports = {
+   attendance,
+
+}
