@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const attendance = require('./attendance.js')
 const subject = require('./subject.js')
+const lecterur = require('./lecterur.js')
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
@@ -49,8 +50,9 @@ app.post('/attendance', async (req, res) => {
 }
 );
 
+//Subject
 app.post('/subject', async (req, res) => {
-  const { matrix, date, subject, code, section } = req.body;
+  const { matrix, section, subject, code, program, lecterur} = req.body;
   client.db("BENR2423").collection("Subject").insertOne({
     "matrix": req.body.matrix,
     "section": req.body.section,
@@ -61,6 +63,22 @@ app.post('/subject', async (req, res) => {
   })
 
   res.send("Subject Added")
+}
+);
+
+//Lecterur
+app.post('/lecterur', async (req, res) => {
+  const { subject, code, program, lecterur } = req.body;
+  client.db("BENR2423").collection("lecterur").insertOne({
+    
+
+    "subject": subject,
+    "code": code,
+    "program": program,
+    "lecterur": lecterur
+  })
+
+  res.send("lecterur Added")
 }
 );
 
