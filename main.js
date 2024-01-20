@@ -123,6 +123,8 @@ function generateAccessToken(payload) {
   return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
 }
 
+
+
 app.post('/register', (req, res) => {
 
   const { username, password, role } = req.body;
@@ -131,13 +133,30 @@ app.post('/register', (req, res) => {
 
   const hash = bcrypt.hashSync(password, 10);
 
-  client.db("BENR2423").collection("users").insertOne({
-    "username": req.body.username,
-    "password": hash,
-    "role": req.body.role
-  });
+  client.db("BENR2423").collection("users").find({
+    "username":{$eq:req.body.username }
+    
 
-  res.send("register success")
+
+  }).toArray().then((result) =>{
+    console.log(result)
+
+    if(result.length>0) {
+
+      res.status(400).send ("Username already exists")
+    }
+    else {
+       client.db("BENR2423").collection("users").insertOne(
+    {
+      "username": req.body.username,
+      "password": hash,
+      "role": req.body.role
+    })
+   res.send('register succesfully')
+  
+    }
+  } )
+
 })
 
 app.post('/login', async (req, res) => {
