@@ -38,50 +38,96 @@ app.use(express.json())
 //student attendance
 app.post('/attendance', async (req, res) => {
   const { matrix, date, subject, code, section } = req.body;
-  client.db("BENR2423").collection("attendance").insertOne({
-    "matrix": req.body.matrix,
+
+  client.db("BENR2423").collection("attendance").find({
+    "matrix":{$eq:req.body.matrix },
+
+    
+  }).toArray().then((result) =>{
+    console.log(result)
+
+    if(result.length>0) {
+
+      res.status(400).send ("Matrix already exists")
+    }
+    else {
+       client.db("BENR2423").collection("attendance").insertOne(
+    {
+      "matrix": req.body.matrix,
     "date": req.body.date,
     "subject": req.body.subject,
     "code": req.body.code,
     "section": req.body.section
   })
+   res.send('Attendance Submitted')
+  
+    }
+  } )
 
-  res.send("Attendance Submitted")
-}
-);
+})
+
 
 //Subject
 app.post('/subject', async (req, res) => {
   const { matrix, section, subject, code, program, lecterur} = req.body;
-  client.db("BENR2423").collection("Subject").insertOne({
-    "matrix": req.body.matrix,
-    "section": req.body.section,
-    "subject": req.body.subject,
-    "code": req.body.code,
-    "program": req.body.program,
-    "lecterur": req.body.lecterur
-  })
 
-  res.send("Subject Added")
-}
-);
+  client.db("BENR2423").collection("Subject").find({
+    "code":{$eq:req.body.code }
+    
+  }).toArray().then((result) =>{
+    console.log(result)
+
+    if(result.length>0) {
+
+      res.status(400).send ("Subject already exists")
+    }
+    else {
+       client.db("BENR2423").collection("Subject").insertOne(
+    {
+      "matrix": req.body.matrix,
+      "section": req.body.section,
+      "subject": req.body.subject,
+      "code": req.body.code,
+      "program": req.body.program,
+      "lecterur": req.body.lecterur
+    })
+   res.send('Subject added succesfully')
+  
+    }
+  } )
+
+})
 
 //Lecterur
 app.post('/lecterur', async (req, res) => {
   const { subject, code, program, lecterur } = req.body;
-  client.db("BENR2423").collection("lecterur").insertOne({
+
+  client.db("BENR2423").collection("lecterur").find({
+    "code":{$eq:req.body.code }
     
+  }).toArray().then((result) =>{
+    console.log(result)
 
-    "subject": subject,
-    "code": code,
-    "program": program,
-    "lecterur": lecterur
-  })
+    if(result.length>0) {
 
-  res.send("lecterur Added")
-}
-);
+      res.status(400).send ("Subject already exists")
+    }
+    else {
+       client.db("BENR2423").collection("lecterur").insertOne(
+    {
+      "subject": subject,
+      "code": code,
+      "program": program,
+      "lecterur": lecterur
+    })
+   res.send('Lecterur register succesfully')
+  
+    }
+  } )
 
+})
+
+ 
 function verifyToken(req, res, next) {
   let header = req.headers.authorization;
 
@@ -123,7 +169,22 @@ function generateAccessToken(payload) {
   return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
 }
 
+app.post('/register', (req, res) => {
 
+  const { username, password, role } = req.body;
+  console.log(username, password);
+
+
+  const hash = bcrypt.hashSync(password, 10);
+
+  client.db("BENR2423").collection("users").insertOne({
+    "username": req.body.username,
+    "password": hash,
+    "role": req.body.role
+  });
+
+  res.send("register success")
+})
 
 app.post('/register', (req, res) => {
 
