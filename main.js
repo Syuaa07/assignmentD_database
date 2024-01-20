@@ -4,6 +4,7 @@ const port = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const attendance = require('./attendance.js')
+const subject = require('./subject.js')
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
@@ -33,16 +34,33 @@ run().catch(console.dir);
 
 app.use(express.json())
 
+//student attendance
 app.post('/attendance', async (req, res) => {
-  const { matrix, date, subject, section } = req.body;
+  const { matrix, date, subject, code, section } = req.body;
   client.db("BENR2423").collection("attendance").insertOne({
     "matrix": req.body.matrix,
     "date": req.body.date,
     "subject": req.body.subject,
+    "code": req.body.code,
     "section": req.body.section
   })
 
   res.send("Attendance Submitted")
+}
+);
+
+app.post('/subject', async (req, res) => {
+  const { matrix, date, subject, code, section } = req.body;
+  client.db("BENR2423").collection("Subject").insertOne({
+    "matrix": req.body.matrix,
+    "section": req.body.section,
+    "subject": req.body.subject,
+    "code": req.body.code,
+    "program": req.body.program,
+    "lecterur": req.body.lecterur
+  })
+
+  res.send("Subject Added")
 }
 );
 
@@ -71,7 +89,7 @@ function verifyToken(req, res, next) {
         return res.status(401).send('Invalid or incomplete token');
       }
 
-      if (decoded.role !== 'lecterur') {
+      if (decoded.role !== 'lecterur' && decoded.role !== 'student' && decoded.role !== 'admin') {
         return res.status(401).send('Invalid role');
       }
 

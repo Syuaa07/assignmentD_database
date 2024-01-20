@@ -6,16 +6,16 @@ const attendance = require ('./attendance.js')
 app.use(express.json())
 
 app.post('/attendance', verifyToken, async (req, res) => {
-    const { matrix, date, subject, section } = req.body;
+    const { matrix, date, subject, code, section } = req.body;
     try {
-      attendanceModule.recordAttendance(matrix, date, subject, section);
+      attendanceModule.recordAttendance(matrix, date, subject, code, section);
       res.status(201).send("Attendance Submitted");
     } catch (error) {
       console.log(error);
       res.status(500).send(`Error ${error}`);
     }
   });
-    async function recordAttendance(matrix, date, subject, section){
+    async function recordAttendance(matrix, date, subject,code, section){
       try{
         const database = client.db ('BENR2423');
         const collection = database.collection('attendance') ;
@@ -24,6 +24,7 @@ app.post('/attendance', verifyToken, async (req, res) => {
           matrix: matrix,
           date :date ,
           subject:subject,
+          code:code,
           section:section,
           };
         
@@ -66,9 +67,9 @@ function verifyToken(req, res, next) {
         client.db('BENR2423').collection('attendance').find({})
       
       }*/
-      if (decoded.role !== 'students') {
+      if (decoded.role !== 'student') {
         return res.status(401).send('Invalid role');
-        client.db('BENR2423').collection('attendance').findOne({username:decoded.user})
+       
       }
       /*if (decoded.role !== 'admin') {
         return res.status(401).send('Invalid role');
