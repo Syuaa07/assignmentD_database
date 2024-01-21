@@ -162,7 +162,7 @@ function verifyToken(req, res, next) {
 
       next();
     });
-    
+
   } catch (error) {
     console.error('Unexpected error:', error);
     res.status(500).send('Internal server error');
@@ -260,12 +260,13 @@ app.post('/login', async (req, res) => {
 app.post('/logout', verifyToken, (req, res) => {
 
   console.log('logout', req.body);
-  const { username,} = req.body;
+ // const { role} = req.body;
 
-  console.log(username);
+  //console.log(role);
 
   res.send("See You Again :)")
 })
+
 
 app.listen(port, () => {
 
