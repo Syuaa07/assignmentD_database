@@ -36,7 +36,7 @@ run().catch(console.dir);
 app.use(express.json())
 
 //student attendance
-app.post('/attendance', async (req, res) => {
+app.post('/attendance', verifyToken, async (req, res) => {
   const { matrix, date, subject, code, section } = req.body;
 
   client.db("BENR2423").collection("attendance").find({
@@ -68,7 +68,7 @@ app.post('/attendance', async (req, res) => {
 
 
 //Subject
-app.post('/subject', async (req, res) => {
+app.post('/subject', verifyToken, async (req, res) => {
   const { matrix, section, subject, code, program, lecterur} = req.body;
 
   client.db("BENR2423").collection("Subject").find({
@@ -99,7 +99,7 @@ app.post('/subject', async (req, res) => {
 })
 
 //Lecterur
-app.post('/lecterur', async (req, res) => {
+app.post('/lecterur', verifyToken, async (req, res) => {
   const { subject, code, program, lecterur } = req.body;
 
   client.db("BENR2423").collection("lecterur").find({
@@ -131,6 +131,7 @@ app.post('/lecterur', async (req, res) => {
 function verifyToken(req, res, next) {
   let header = req.headers.authorization;
 
+
   if (!header) {
     return res.status(401).send('Unauthorized request');
   }
@@ -148,17 +149,20 @@ function verifyToken(req, res, next) {
       }
 
       console.log('Decoded token:', decoded);
+      
+      const { role, username } = req.body;
 
       if (!decoded || !decoded.role) { // Check for missing properties
         return res.status(401).send('Invalid or incomplete token');
       }
 
-      if (decoded.role !== 'lecterur' && decoded.role !== 'student' && decoded.role !== 'admin') {
+      if (decoded.role !== 'lecterur') {
         return res.status(401).send('Invalid role');
       }
 
       next();
     });
+    
   } catch (error) {
     console.error('Unexpected error:', error);
     res.status(500).send('Internal server error');
