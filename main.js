@@ -36,7 +36,7 @@ run().catch(console.dir);
 app.use(express.json())
 
 //student attendance
-app.post('/attendance', verifyToken, async (req, res) => {
+app.post('/attendance' , StudentToken,async (req, res) => {
   const { matrix, date, subject, code, section } = req.body;
 
   client.db("BENR2423").collection("attendance").find({
@@ -68,7 +68,7 @@ app.post('/attendance', verifyToken, async (req, res) => {
 
 
 //Subject
-app.post('/subject', verifyToken, async (req, res) => {
+app.post('/subject',  async (req, res) => {
   const { matrix, section, subject, code, program, lecterur} = req.body;
 
   client.db("BENR2423").collection("Subject").find({
@@ -157,7 +157,48 @@ function verifyToken(req, res, next) {
       }
 
       if (decoded.role !== 'lecterur') {
-        return res.status(401).send('Invalid role');
+        return res.status(401).send('Access Denied.');
+      }
+
+      next();
+    });
+
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).send('Internal server error');
+  }
+}
+
+function StudentToken(req, res, next) {
+  let header = req.headers.authorization;
+
+
+  if (!header) {
+    return res.status(401).send('Unauthorized request');
+  }
+
+  let tokens = header.split(' ')[1]; // Ensure correct space-based split
+
+  try {
+    // Log token for inspection
+    console.log('Received token:', tokens);
+
+    jwt.verify(tokens, 'very strong password', async (err, decoded) => {
+      if (err) {
+        console.error('Error verifying token:', err);
+        return res.status(401).send('Invalid token');
+      }
+
+      console.log('Decoded token:', decoded);
+      
+      const { role, username } = req.body;
+
+      if (!decoded || !decoded.role) { // Check for missing properties
+        return res.status(401).send('Invalid or incomplete token');
+      }
+
+      if (decoded.role !== 'student') {
+        return res.status(401).send( 'You are not authorized to submit attendance.');
       }
 
       next();
@@ -257,7 +298,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/logout', verifyToken, (req, res) => {
+app.post('/logout', (req, res) => {
 
   console.log('logout', req.body);
  // const { role} = req.body;
