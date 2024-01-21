@@ -333,6 +333,14 @@ app.post('/logout', (req, res) => {
   res.send("See You Again :)")
 })
 
+app.get('/view-Details/:attendance', StudentToken, (req, res) => {
+  // Your actual request logic goes here
+  const { matrix } = req.body;
+client.db("BENR2423").collection("attendance").find({ "matrix": matrix }).toArray();
+  
+  res.status(200).send('Attendance Details');
+  });
+
 
 app.listen(port, () => {
 
