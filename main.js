@@ -36,7 +36,7 @@ run().catch(console.dir);
 app.use(express.json())
 
 //student attendance
-app.post('/attendance' , StudentToken,async (req, res) => {
+app.post('/attendance' , StudentToken, async (req, res) => {
   const { matrix, date, subject, code, section } = req.body;
 
   client.db("BENR2423").collection("attendance").find({
@@ -197,7 +197,7 @@ function SubjectToken(req, res, next) {
         return res.status(401).send('Invalid or incomplete token');
       }
 
-      if (decoded.role !== 'admin' && decoded.role !== 'lecterur') {
+      if (decoded.role !== 'student') {
         return res.status(401).send( 'You are not authorized to submit subject.');
       }
 

@@ -6,7 +6,7 @@ const subject = require ('./subject.js')
 
 app.use(express.json())
 
-app.post('/subject', verifyToken, async (req, res) => {
+app.post('/subject', SubjectToken, async (req, res) => {
     const subject = {
         matrix: req.body.matrix,
         subject: req.body.subject,
@@ -33,42 +33,46 @@ app.post('/subject', verifyToken, async (req, res) => {
         client.close();
     });
 
-    function verifyToken(req, res, next) {
-        let header = req.headers.authorization;
-      
-        if (!header) {
-          return res.status(401).send('Unauthorized request');
-        }
-      
-        let tokens = header.split(' ')[1]; // Ensure correct space-based split
-      
-        try {
-          // Log token for inspection
-          console.log('Received token:', tokens);
-      
-          jwt.verify(tokens, 'very strong password', async (err, decoded) => {
-            if (err) {
-              console.error('Error verifying token:', err);
-              return res.status(401).send('Invalid token');
-            }
-      
-            console.log('Decoded token:', decoded);
-      
-            if (!decoded || !decoded.role) { // Check for missing properties
-              return res.status(401).send('Invalid or incomplete token');
-            }
-      
-            if (decoded.role !== 'lecterur' && decoded.role !== 'student' && decoded.role !== 'admin') {
-              return res.status(401).send('Invalid role');
-            }
-      
-            next();
-          });
-        } catch (error) {
-          console.error('Unexpected error:', error);
-          res.status(500).send('Internal server error');
-        }
+    function SubjectToken(req, res, next) {
+      let header = req.headers.authorization;
+    
+    
+      if (!header) {
+        return res.status(401).send('Unauthorized request');
       }
+    
+      let tokens = header.split(' ')[1]; // Ensure correct space-based split
+    
+      try {
+        // Log token for inspection
+        console.log('Received token:', tokens);
+    
+        jwt.verify(tokens, 'very strong password', async (err, decoded) => {
+          if (err) {
+            console.error('Error verifying token:', err);
+            return res.status(401).send('Invalid token');
+          }
+    
+          console.log('Decoded token:', decoded);
+          
+          const { role, username } = req.body;
+    
+          if (!decoded || !decoded.role) { // Check for missing properties
+            return res.status(401).send('Invalid or incomplete token');
+          }
+    
+          if (decoded.role !== 'admin' && decoded.role !== 'lecterur') {
+            return res.status(401).send( 'You are not authorized to submit subject.');
+          }
+    
+          next();
+        });
+    
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        res.status(500).send('Internal server error');
+      }
+    }
    
 
     module.exports = {
