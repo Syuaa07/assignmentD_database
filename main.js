@@ -68,7 +68,7 @@ app.post('/attendance' , StudentToken,async (req, res) => {
 
 
 //Subject
-app.post('/subject',  async (req, res) => {
+app.post('/subject', SubjectToken, async (req, res) => {
   const { matrix, section, subject, code, program, lecterur} = req.body;
 
   client.db("BENR2423").collection("Subject").find({
@@ -156,8 +156,49 @@ function verifyToken(req, res, next) {
         return res.status(401).send('Invalid or incomplete token');
       }
 
-      if (decoded.role !== 'lecterur') {
+      if (decoded.role !== 'admin' && decoded.role !== 'lecterur') {
         return res.status(401).send('Access Denied.');
+      }
+
+      next();
+    });
+
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).send('Internal server error');
+  }
+}
+
+function SubjectToken(req, res, next) {
+  let header = req.headers.authorization;
+
+
+  if (!header) {
+    return res.status(401).send('Unauthorized request');
+  }
+
+  let tokens = header.split(' ')[1]; // Ensure correct space-based split
+
+  try {
+    // Log token for inspection
+    console.log('Received token:', tokens);
+
+    jwt.verify(tokens, 'very strong password', async (err, decoded) => {
+      if (err) {
+        console.error('Error verifying token:', err);
+        return res.status(401).send('Invalid token');
+      }
+
+      console.log('Decoded token:', decoded);
+      
+      const { role, username } = req.body;
+
+      if (!decoded || !decoded.role) { // Check for missing properties
+        return res.status(401).send('Invalid or incomplete token');
+      }
+
+      if (decoded.role !== 'admin' && decoded.role !== 'lecterur') {
+        return res.status(401).send( 'You are not authorized to submit subject.');
       }
 
       next();
@@ -214,22 +255,6 @@ function generateAccessToken(payload) {
   return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
 }
 
-app.post('/register', (req, res) => {
-
-  const { username, password, role } = req.body;
-  console.log(username, password);
-
-
-  const hash = bcrypt.hashSync(password, 10);
-
-  client.db("BENR2423").collection("users").insertOne({
-    "username": req.body.username,
-    "password": hash,
-    "role": req.body.role
-  });
-
-  res.send("register success")
-})
 
 app.post('/register', (req, res) => {
 
