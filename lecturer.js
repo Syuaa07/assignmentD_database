@@ -2,12 +2,12 @@
 const express = require('express')
 const app = express();
 const port = process.env.PORT || 3000;
-const lecterur = require ('./lecterur.js')
+const lecturer = require ('./lecturer.js')
 
 app.use(express.json())
 
-app.post('/lecterur', verifyToken, async (req, res) => {
-    const lecterur = {
+app.post('/lecturer', verifyToken, async (req, res) => {
+    const lecturer = {
     
         subject: req.body.subject,
         code:req.body.code,
@@ -18,9 +18,9 @@ app.post('/lecterur', verifyToken, async (req, res) => {
 
     
         const db = client.db("BENR2423");
-        const lecterurCollection = db.collection('lecterur');
+        const lecturerCollection = db.collection('lecturer');
 
-        lecterurCollection.insertOne(lecterur, (err, result) => {
+        lecturerCollection.insertOne(lecturer, (err, result) => {
             if (err) {
                 console.error('Error inserting subject:', err);
                 res.status(500).send('Error inserting subject');
@@ -58,7 +58,7 @@ app.post('/lecterur', verifyToken, async (req, res) => {
               return res.status(401).send('Invalid or incomplete token');
             }
       
-            if (decoded.role !== 'lecterur' && decoded.role !== 'student' && decoded.role !== 'admin') {
+            if (decoded.role !== 'lecturer' &&  decoded.role !== 'admin') {
               return res.status(401).send('Invalid role');
             }
       
@@ -72,5 +72,5 @@ app.post('/lecterur', verifyToken, async (req, res) => {
    
 
     module.exports = {
-        lecterur,
+        lecturer,
     }

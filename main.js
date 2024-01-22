@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const attendance = require('./attendance.js')
 const subject = require('./subject.js')
-const lecterur = require('./lecterur.js')
+const lecturer = require('./lecturer.js')
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
@@ -53,11 +53,11 @@ app.post('/attendance' , StudentToken, async (req, res) => {
     else {
        client.db("BENR2423").collection("attendance").insertOne(
     {
-      "matrix": req.body.matrix,
-    "date": req.body.date,
-    "subject": req.body.subject,
-    "code": req.body.code,
-    "section": req.body.section
+      "matrix": matrix,
+    "date": date,
+    "subject": subject,
+    "code": code,
+    "section": section
   })
    res.send('Attendance Submitted')
   
@@ -69,7 +69,7 @@ app.post('/attendance' , StudentToken, async (req, res) => {
 
 //Subject
 app.post('/subject', SubjectToken, async (req, res) => {
-  const { matrix, section, subject, code, program, lecterur} = req.body;
+  const { matrix, section, subject, code, program, lecturer} = req.body;
 
   client.db("BENR2423").collection("Subject").find({
     "code":{$eq:req.body.code }
@@ -84,12 +84,12 @@ app.post('/subject', SubjectToken, async (req, res) => {
     else {
        client.db("BENR2423").collection("Subject").insertOne(
     {
-      "matrix": req.body.matrix,
-      "section": req.body.section,
-      "subject": req.body.subject,
-      "code": req.body.code,
-      "program": req.body.program,
-      "lecterur": req.body.lecterur
+      "matrix": matrix,
+      "section": section,
+      "subject": subject,
+      "code": code,
+      "program": program,
+      "lecturer": lecturer
     })
    res.send('Subject added succesfully')
   
@@ -98,11 +98,11 @@ app.post('/subject', SubjectToken, async (req, res) => {
 
 })
 
-//Lecterur
-app.post('/lecterur', verifyToken, async (req, res) => {
-  const { subject, code, program, lecterur } = req.body;
+//Lecturer
+app.post('/lecturer', verifyToken, async (req, res) => {
+  const { subject, code, program, lecturer } = req.body;
 
-  client.db("BENR2423").collection("lecterur").find({
+  client.db("BENR2423").collection("lecturer").find({
     "code":{$eq:req.body.code }
     
   }).toArray().then((result) =>{
@@ -113,14 +113,14 @@ app.post('/lecterur', verifyToken, async (req, res) => {
       res.status(400).send ("Subject already exists")
     }
     else {
-       client.db("BENR2423").collection("lecterur").insertOne(
+       client.db("BENR2423").collection("lecturer").insertOne(
     {
       "subject": subject,
       "code": code,
       "program": program,
-      "lecterur": lecterur
+      "lecturer": lecturer
     })
-   res.send('Lecterur register succesfully')
+   res.send('Lecturer register succesfully')
   
     }
   } )
@@ -156,7 +156,7 @@ function verifyToken(req, res, next) {
         return res.status(401).send('Invalid or incomplete token');
       }
 
-      if (decoded.role !== 'admin' && decoded.role !== 'lecterur') {
+      if (decoded.role !== 'admin' && decoded.role !== 'lecturer') {
         return res.status(401).send('Access Denied.');
       }
 
@@ -333,10 +333,10 @@ app.post('/logout', (req, res) => {
   res.send("See You Again :)")
 })
 
-app.get('/view-Details/:attendance', StudentToken, (req, res) => {
+app.get('/view-Details/:program', StudentToken, (req, res) => {
   // Your actual request logic goes here
-  const { matrix } = req.body;
-client.db("BENR2423").collection("attendance").find({ "matrix": matrix }).toArray();
+  const { program } = req.body;
+client.db("BENR2423").collection("attendance").find({ "program": program }).toArray();
   
   res.status(200).send('Attendance Details');
   });
