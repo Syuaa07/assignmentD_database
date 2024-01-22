@@ -7,7 +7,7 @@ const attendance = require('./attendance.js')
 const subject = require('./subject.js')
 const lecturer = require('./lecturer.js')
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, MongoDBNamespace } = require('mongodb');
 const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -66,8 +66,7 @@ app.post('/attendance' , StudentToken, async (req, res) => {
 
 })
 
-
-//Subject
+// Subject
 app.post('/subject', SubjectToken, async (req, res) => {
   const { matrix, section, subject, code, program, lecturer} = req.body;
 
@@ -98,7 +97,7 @@ app.post('/subject', SubjectToken, async (req, res) => {
 
 })
 
-//Lecturer
+// Lecturer
 app.post('/lecturer', verifyToken, async (req, res) => {
   const { subject, code, program, lecturer } = req.body;
 
@@ -127,7 +126,7 @@ app.post('/lecturer', verifyToken, async (req, res) => {
 
 })
 
- 
+ // Token for lecterur and admin
 function verifyToken(req, res, next) {
   let header = req.headers.authorization;
 
@@ -169,6 +168,7 @@ function verifyToken(req, res, next) {
   }
 }
 
+// Token for subject
 function SubjectToken(req, res, next) {
   let header = req.headers.authorization;
 
@@ -210,6 +210,7 @@ function SubjectToken(req, res, next) {
   }
 }
 
+// Token for student attendance
 function StudentToken(req, res, next) {
   let header = req.headers.authorization;
 
@@ -255,7 +256,7 @@ function generateAccessToken(payload) {
   return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
 }
 
-
+// Register for users (admin, lecturer, student)
 app.post('/register', (req, res) => {
 
   const { username, password, role } = req.body;
@@ -266,8 +267,6 @@ app.post('/register', (req, res) => {
 
   client.db("BENR2423").collection("users").find({
     "username":{$eq:req.body.username }
-    
-
 
   }).toArray().then((result) =>{
     console.log(result)
@@ -290,6 +289,7 @@ app.post('/register', (req, res) => {
 
 })
 
+// Login for users (admin, lecturer, student)
 app.post('/login', async (req, res) => {
   console.log('login', req.body);
   const { username, password } = req.body;
@@ -323,6 +323,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Logout for users (admin, lecturer, student)
 app.post('/logout', (req, res) => {
 
   console.log('logout', req.body);
@@ -333,15 +334,16 @@ app.post('/logout', (req, res) => {
   res.send("See You Again :)")
 })
 
-app.get('/view-Details/:program', StudentToken, (req, res) => {
-  // Your actual request logic goes here
+// Get users (admin, lecturer)
+app.get('/attendance/:program', StudentToken, (req, res) => {
+   //Your actual request logic goes here
   const { program } = req.body;
-client.db("BENR2423").collection("attendance").find({ "program": program }).toArray();
+  client.db("BENR2423").collection("attendance").find({ "program": program }).toArray();
   
   res.status(200).send('Attendance Details');
   });
 
-
+// Connect to the MongoDB cluster
 app.listen(port, () => {
 
   console.log(`Example app listening on port ${port}`)

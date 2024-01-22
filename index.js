@@ -14,7 +14,12 @@ app.get('/subject', (req, res) => {
 app.get('/lecturer', (req, res) => {
  res.send('Lecturer')
 })
-
+app.get('/login', (req, res) => {
+    res.send('Login')
+})
+app.get('/logout', (req, res) => {
+    res.send('Logout')
+})
 
 app.listen(port, () => {
  console.log(`Example app listening on port ${port}`)
