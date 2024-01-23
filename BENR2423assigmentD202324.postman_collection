@@ -1,0 +1,309 @@
+{
+	"info": {
+		"_postman_id": "6656a877-b452-442c-a2de-21885da91eeb",
+		"name": "BENR2423 Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30848481"
+	},
+	"item": [
+		{
+			"name": "http://localhost:3000/register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"San\",\r\n    \"password\":\"San\",\r\n    \"role\":\"admin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"San\",\r\n    \"password\": \"San\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/attendance",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiQXMiLCJyb2xlIjoibGVjdGVydXIiLCJpYXQiOjE3MDU3MzEzMTEsImV4cCI6MTczNzI2NzMxMX0.tlV251oQJso0fDAaqp15COyFzlwPDyRcpQdlURj9BCQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n  \"matrix\":\"b02221\",\r\n \"date\":\"18/9/2023\",\r\n \"subject\":\"database\",\r\n \"code\":\"BENR 2423\",\r\n \"section\":\"s3\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/attendance",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"attendance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/subject",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n\"matrix\": \"b012112\",\r\n \"section\":\"s3\",\r\n \"subject\":\"database\",\r\n  \"program\":\"BERR\",\r\n  \"lecterur\":\"Dr soo\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/Subject",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"Subject"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/lecturer",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiTkFTIiwicm9sZSI6InN0dWRlbnQiLCJpYXQiOjE3MDU4MjYyOTYsImV4cCI6MTczNzM2MjI5Nn0.EAiuwqVk1gm9UN7B7qK33xVQPz0xJep9qqADoYb0ttc",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n \"subject\":\"VLSI\",\r\n  \"code\":\"BENR 3613\",\r\n  \"program\":\"BERR\",\r\n  \"lecterur\":\"Dr Idzihar\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/lecturer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"lecturer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/logout",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiQXMiLCJyb2xlIjoibGVjdGVydXIiLCJpYXQiOjE3MDU4MjAzMjgsImV4cCI6MTczNzM1NjMyOH0.D4XxojFXy_YTFoxFRBItZtGIEo6TdsoYRN2sf6mJXhk",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/view/Details",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \r\n      \"database\": \"client.db(BENR2423)\",\r\n      \"collection\": \"database.collection(attendance)\"\r\n       \r\n\r\n      \r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/view/Details",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"view",
+						"Details"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://assignmentddatabase.azurewebsites.net",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://assignmentddatabase.azurewebsites.net",
+					"protocol": "http",
+					"host": [
+						"assignmentddatabase",
+						"azurewebsites",
+						"net"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/view-details/:attendance",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiU2FuIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzA1OTc2NDQ4LCJleHAiOjE3Mzc1MTI0NDh9.hukl8EQ5oleXFXvRkxhCnn_-6FPAh92PERQo1VtM9QU",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "file",
+					"file": {}
+				},
+				"url": {
+					"raw": "http://localhost:3000/view/Details/:code",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"view",
+						"Details",
+						":code"
+					],
+					"variable": [
+						{
+							"key": "code",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
