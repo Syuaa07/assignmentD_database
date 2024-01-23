@@ -3,6 +3,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { ObjectId } = require('mongodb');
 const attendance = require('./attendance.js')
 const subject = require('./subject.js')
 const lecturer = require('./lecturer.js')
@@ -19,6 +20,7 @@ const client = new MongoClient(uri, {
   }
 });
 
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -34,6 +36,36 @@ async function run() {
 run().catch(console.dir);
 
 app.use(express.json())
+
+// View details
+app.post('/view/Details' , async (req, res) => {
+  const { code } = req.body;
+try{
+  viewDetails(code);
+  return res.send("Details view succesfully")
+}
+catch (err) {
+    console.error(err);
+    res.status(500).send('Error retrieving data from database');
+  }
+})
+
+  function viewDetails(req,res){
+try{
+    const database = client.db("BENR2423");
+    const collection = database.collection("attendance");
+
+    
+    const code = collection.find({code: "code"}).toArray();
+
+    return code;
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send('Error retrieving data');
+  }
+  
+  }
 
 //student attendance
 app.post('/attendance' , StudentToken, async (req, res) => {
@@ -334,14 +366,20 @@ app.post('/logout', (req, res) => {
   res.send("See You Again :)")
 })
 
-// Get users (admin, lecturer)
-app.get('/attendance/:program', StudentToken, (req, res) => {
-   //Your actual request logic goes here
-  const { program } = req.body;
-  client.db("BENR2423").collection("attendance").find({ "program": program }).toArray();
+// View attendance for lecturer or admin
+app.get('/view/Details/:code', verifyToken, async (req, res) => {
+
   
-  res.status(200).send('Attendance Details');
-  });
+  try {
+    const details = await viewDetails(client, req.params.code);
+ 
+    return res.status(200).send("Details view succesfully")
+  }
+  catch (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+    }
+  })
 
 // Connect to the MongoDB cluster
 app.listen(port, () => {
