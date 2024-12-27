@@ -15,7 +15,7 @@ app.get('/lecturer', (req, res) => {
  res.send('Lecturer')
 })
 app.get('/login', (req, res) => {
-    res.send('Login')
+    res.send('Login Successfully')
 })
 app.get('/logout', (req, res) => {
     res.send('Logout')

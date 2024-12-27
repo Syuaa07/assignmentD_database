@@ -9,7 +9,7 @@ const subject = require('./subject.js')
 const lecturer = require('./lecturer.js')
 
 const { MongoClient, ServerApiVersion, MongoDBNamespace } = require('mongodb');
-const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://b022210028:0zYZqBoOLuoGjuNf@cluster0.vsvuozb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -50,13 +50,17 @@ catch (err) {
   }
 })
 
-  function viewDetails(req,res){
+ async function viewDetails(req,res){
 try{
+
+    await client.connect();
+
     const database = client.db("BENR2423");
     const collection = database.collection("attendance");
 
     
-    const code = collection.find({code: "code"}).toArray();
+    const code = await collection.find({code: "code"}).toArray();
+    console.log(code);
 
     return code;
   }
@@ -371,7 +375,8 @@ app.get('/view/Details/:code', verifyToken, async (req, res) => {
 
   
   try {
-    const details = await viewDetails(client, req.params.code);
+    
+    await viewDetails(client, req.params.code);
  
     return res.status(200).send("Details view succesfully")
   }
