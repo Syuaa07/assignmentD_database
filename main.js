@@ -104,7 +104,7 @@ app.post('/attendance' , StudentToken, async (req, res) => {
 
 // Subject
 app.post('/subject', SubjectToken, async (req, res) => {
-  const { matrix, section, subject, code, program, lecturer} = req.body;
+  const { subject, code, program, lecturer} = req.body;
 
   client.db("BENR2423").collection("Subject").find({
     "code":{$eq:req.body.code }
@@ -119,8 +119,8 @@ app.post('/subject', SubjectToken, async (req, res) => {
     else {
        client.db("BENR2423").collection("Subject").insertOne(
     {
-      "matrix": matrix,
-      "section": section,
+      
+      
       "subject": subject,
       "code": code,
       "program": program,
@@ -291,13 +291,20 @@ function StudentToken(req, res, next) {
 function generateAccessToken(payload) {
   return jwt.sign(payload, "very strong password", { expiresIn: '365d' });
 }
-
+// Helper function to validate password strength
+function isPasswordStrong(password) {
+  const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return regex.test(password);
+}
 // Register for users (admin, lecturer, student)
 app.post('/register', (req, res) => {
 
   const { username, password, role } = req.body;
   console.log(username, password);
 
+  if (!isPasswordStrong(password)) {
+    return res.status(400).send('Password must contain at least one uppercase letter, one number, one special character, and be at least 8 characters long.');
+  }
 
   const hash = bcrypt.hashSync(password, 10);
 
@@ -325,24 +332,64 @@ app.post('/register', (req, res) => {
 
 })
 
+// In-memory store for failed attempts during a session (use Redis for production)
+/*const sessionAttempts = {};
+
+// Maximum password re-entry attempts and cooldown duration (in milliseconds)
+const MAX_PASSWORD_ATTEMPTS = 3;
+const COOL_DOWN_PERIOD = 30 * 60 * 1000; // 30 minutes*/
+
 // Login for users (admin, lecturer, student)
-app.post('/login', async (req, res) => {
+/*app.post('/login', async (req, res) => {
   console.log('login', req.body);
   const { username, password } = req.body;
 
-  console.log(username, password);
+  if (!username || !password) {
+    return res.status(400).send("Username and password are required");
+  }
+
+  // Initialize or fetch session attempt data
+  const currentTime = Date.now();
+  const userSession = sessionAttempts[password] || { attempts: 0, lockUntil: null };
+
+  // Check if user is locked out
+  if (userSession.lockUntil && userSession.lockUntil > currentTime) {
+    const waitTime = Math.ceil((userSession.lockUntil - currentTime) / 1000);
+    return res.status(403).send(`Too many incorrect attempts. Try again in ${waitTime} seconds.`);
+  }
+
+  // Validate password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    // Increment password attempts
+    userSession.attempts += 1;
+
+    if (userSession.attempts >= MAX_PASSWORD_ATTEMPTS) {
+      userSession.lockUntil = currentTime + COOL_DOWN_PERIOD; // Lock account for cooldown period
+      sessionAttempts[password] = userSession;
+      return res.status(403).send("Too many incorrect attempts. Try again in 30 minutes.");
+    }
+
+    sessionAttempts[password] = userSession;
+    const remainingAttempts = MAX_PASSWORD_ATTEMPTS - userSession.attempts;
+    return res
+      .status(401)
+      .send(`Incorrect password. You have ${remainingAttempts} attempts remaining.`);
+  }
+
 
   const user = await client.db("BENR2423").collection("users").find({ "username": username }).toArray();
   console.log(user);
-
+  
   if (user) {
-    bcrypt.compare(password, user[0].password, (err, result) => {
+    bcrypt.compare(password, user.password, (err, result) => {
       if (result) {
 
         const token = jwt.sign({
 
-          user: user[0].username,
-          role: user[0].role
+          user: user.username,
+          role: user.role
         }, "very strong password", { expiresIn: "365d" });
 
         res.send(token)
@@ -357,7 +404,80 @@ app.post('/login', async (req, res) => {
     res.send("user not found")
 
   }
+});*/
+
+// In-memory store for failed attempts during a session (use Redis for production)
+const sessionAttempts = {};
+
+// Maximum password re-entry attempts and cooldown duration (in milliseconds)
+const MAX_PASSWORD_ATTEMPTS = 3;
+const COOL_DOWN_PERIOD = 10 * 60 * 1000; // 30 minutes
+
+// Login for users (admin, lecturer, student)
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).send("Username and password are required");
+  }
+
+  // Initialize or fetch session attempt data
+  const currentTime = Date.now();
+  sessionAttempts[username] = sessionAttempts[username] || { attempts: 0, lockUntil: null };
+  const userSession = sessionAttempts[username];
+
+  // Check if the user is locked out
+  if (userSession.lockUntil && userSession.lockUntil > currentTime) {
+    const waitTime = Math.ceil((userSession.lockUntil - currentTime) / 1000);
+    return res.status(403).send(`Too many incorrect attempts. Try again in ${waitTime} seconds.`);
+  }
+
+  try {
+    // Fetch user from database
+    const users = await client.db("BENR2423").collection("users").find({ username }).toArray();
+
+    if (!users || users.length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    const user = users[0];
+
+    // Validate password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      // Increment failed attempts
+      userSession.attempts += 1;
+
+      if (userSession.attempts >= MAX_PASSWORD_ATTEMPTS) {
+        userSession.lockUntil = currentTime + COOL_DOWN_PERIOD; // Lock the user for cooldown period
+        return res.status(403).send("Too many incorrect attempts. Try again in 30 minutes.");
+      }
+
+      const remainingAttempts = MAX_PASSWORD_ATTEMPTS - userSession.attempts;
+      return res
+        .status(401)
+        .send(`Incorrect password. You have ${remainingAttempts} attempts remaining.`);
+    }
+
+    // Reset session attempts on successful login
+    userSession.attempts = 0;
+    userSession.lockUntil = null;
+
+    // Generate and send JWT token
+    const token = jwt.sign(
+      { user: user.username, role: user.role },
+      "very strong password",
+      { expiresIn: "365d" }
+    );
+
+    res.send(token);
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).send("Internal server error");
+  }
 });
+
 
 // Logout for users (admin, lecturer, student)
 app.post('/logout', (req, res) => {
