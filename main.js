@@ -451,7 +451,7 @@ app.post('/login', async (req, res) => {
 
       if (userSession.attempts >= MAX_PASSWORD_ATTEMPTS) {
         userSession.lockUntil = currentTime + COOL_DOWN_PERIOD; // Lock the user for cooldown period
-        return res.status(403).send("Too many incorrect attempts. Try again in 30 minutes.");
+        return res.status(403).send("Too many incorrect attempts. Try again in 10 minutes.");
       }
 
       const remainingAttempts = MAX_PASSWORD_ATTEMPTS - userSession.attempts;
