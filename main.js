@@ -38,27 +38,33 @@ run().catch(console.dir);
 app.use(express.json())
 
 // View details
-app.post('/view/Details' , async (req, res) => {
-  const { code } = req.body;
-try{
-  viewDetails(code);
-  return res.send("Details view succesfully")
-}
-catch (err) {
+app.post('/view/Details', async (req, res) => {
+  try {
+    // Validate request body
+    const { code } = req.body;
+    if (!code) {
+      return res.status(400).json({ error: "Code is required" });
+    }
+
+    // Fetch details
+    const details = await viewDetails(code);
+    console.log(details);
+    return res.status(200).json(details);
+  } catch (err) {
     console.error(err);
-    res.status(500).send('Error retrieving data from database');
+    return res.status(500).send('Error retrieving data from database');
   }
-})
+});
 
  async function viewDetails(req,res){
 try{
 
     await client.connect();
-
+    
     const database = client.db("BENR2423");
     const collection = database.collection("attendance");
 
-    
+    // Query the database with the provided code
     const code = await collection.find({code: "code"}).toArray();
     console.log(code);
 
