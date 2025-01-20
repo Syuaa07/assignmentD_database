@@ -55,12 +55,12 @@ app.post('/view/Details', verifyToken, async (req, res) => {
     console.error(err);
     return res.status(500).send('Error retrieving data from database');
   }
-}),
+})
 
  async function viewDetails(){
 try {
 
-    //await client.connect();
+    await client.connect();
     
     const database = client.db("BENR2423");
     const collection = database.collection("attendance");
