@@ -38,7 +38,8 @@ run().catch(console.dir);
 app.use(express.json())
 
 // View details
-app.post('/view/Details', async (req, res) => {
+app.post('/view/Details', verifyToken, async (req, res) => {
+  
   try {
     // Validate request body
     const { code } = req.body;
@@ -47,25 +48,25 @@ app.post('/view/Details', async (req, res) => {
     }
 
     // Fetch details
-    const details = await viewDetails(code);
+    const details = await viewDetails();
     console.log(details);
     return res.status(200).json(details);
   } catch (err) {
     console.error(err);
     return res.status(500).send('Error retrieving data from database');
   }
-});
+}),
 
- async function viewDetails(req,res){
-try{
+ async function viewDetails(){
+try {
 
-    await client.connect();
+    //await client.connect();
     
     const database = client.db("BENR2423");
     const collection = database.collection("attendance");
 
     // Query the database with the provided code
-    const code = await collection.find({code: "code"}).toArray();
+    const code = await collection.find({"code":{$eq:req.body.code}}).toArray();
     console.log(code);
 
     return code;
